@@ -4,6 +4,7 @@ Train a noised image classifier on ImageNet.
 
 import argparse
 import os
+import sys
 
 import blobfile as bf
 import torch as th
@@ -242,4 +243,9 @@ def setup_seed(seed):
     torch.backends.cudnn.deterministic = True
 
 if __name__ == "__main__":
+    print("Python executable:", sys.executable)
+    print("PyTorch:", torch.__version__)
+    print("CUDA available:", torch.cuda.is_available())
+    print("CUDA device count:", torch.cuda.device_count())
+    
     main()

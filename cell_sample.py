@@ -9,6 +9,8 @@ import torch as th
 import torch.distributed as dist
 import random
 
+import sys
+
 from guided_diffusion import dist_util, logger
 from guided_diffusion.script_util import (   
     NUM_CLASSES,
@@ -91,4 +93,9 @@ def setup_seed(seed):
 
 
 if __name__ == "__main__":
+    print("Python executable:", sys.executable)
+    print("PyTorch:", th.__version__)
+    print("CUDA available:", th.cuda.is_available())
+    print("CUDA device count:", th.cuda.device_count())
+
     main()

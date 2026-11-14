@@ -6,6 +6,8 @@ import numpy as np
 import torch
 from VAE_model import VAE
 import sys
+import wandb
+
 sys.path.append("..")
 # from guided_diffusion.cell_datasets import load_data
 # from guided_diffusion.cell_datasets_sapiens import load_data
@@ -118,7 +120,10 @@ def parse_arguments():
 
     parser = argparse.ArgumentParser(description="Finetune Scimilarity")
     # dataset arguments
-    parser.add_argument("--data_dir", type=str, default='/data1/lep/Workspace/guided-diffusion/data/tabula_muris/all.h5ad')
+
+    # parser.add_argument("--data_dir", type=str, default='/data1/lep/Workspace/guided-diffusion/data/tabula_muris/all.h5ad')
+    parser.add_argument("--data_dir", type=str, default='../data/tabula_muris/all.h5ad')
+
     parser.add_argument("--loss_ae", type=str, default="mse")
     parser.add_argument("--decoder_activation", type=str, default="ReLU")
 
@@ -134,7 +139,8 @@ def parse_arguments():
     parser.add_argument("--max_minutes", type=int, default=3000)
     parser.add_argument("--checkpoint_freq", type=int, default=50000)
     parser.add_argument("--batch_size", type=int, default=128)
-    parser.add_argument("--state_dict", type=str, default="/data1/lep/Workspace/guided-diffusion/scimilarity-main/models/annotation_model_v1")  # if pretrain
+
+    parser.add_argument("--state_dict", type=str, default="../data/annotation_model_v1")  # if pretrain
     # parser.add_argument("--state_dict", type=str, default=None)   # if not pretrain
 
     parser.add_argument("--save_dir", type=str, default='../output/ae_checkpoint/muris_AE')
@@ -144,4 +150,5 @@ def parse_arguments():
 
 if __name__ == "__main__":
     seed_everything(1234)
+    wandb.init(project="scDiffusion", name="baseline-autoencoder-training")
     train_vae(parse_arguments())

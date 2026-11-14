@@ -5,6 +5,7 @@ Helpers for distributed training.
 import io
 import os
 import socket
+import sys
 
 import blobfile as bf
 from mpi4py import MPI
@@ -46,7 +47,8 @@ def dev():
     """
     Get the device to use for torch.distributed.
     """
-    if th.cuda.is_available():
+    # if th.cuda.is_available():
+    if True:
         return th.device(f"cuda")
     return th.device("cpu")
 

@@ -3,6 +3,7 @@ Train a diffusion model on images.
 """
 
 import argparse
+import sys
 
 from guided_diffusion import dist_util, logger
 # from guided_diffusion.cell_datasets import load_data
@@ -99,4 +100,9 @@ def setup_seed(seed):
     torch.backends.cudnn.deterministic = True
 
 if __name__ == "__main__":
+    print("Python executable:", sys.executable)
+    print("PyTorch:", torch.__version__)
+    print("CUDA available:", torch.cuda.is_available())
+    print("CUDA device count:", torch.cuda.device_count())
+
     main()

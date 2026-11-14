@@ -1,6 +1,6 @@
 import anndata as ad
 
-files = ["data/tabula_muris/all.h5ad", "data/muris_mam_spl_T_B.h5ad"]
+files = ["data/tabula_muris/all.h5ad"]
 
 for filename in files:
     adata = ad.read_h5ad(filename)
@@ -24,3 +24,5 @@ for filename in files:
 
     print("\nFirst 5 cell metadata rows:")
     print(adata.obs.head())
+
+    print(adata.obs['celltype'].unique())
