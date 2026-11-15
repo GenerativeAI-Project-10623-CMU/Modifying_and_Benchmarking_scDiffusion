@@ -157,6 +157,17 @@ def parse_arguments():
 
 
 if __name__ == "__main__":
+    torch.cuda.synchronize()
+    start_time = time.perf_counter()
+
     seed_everything(1234)
     wandb.init(project="scDiffusion", name="baseline-autoencoder-training")
     train_vae(parse_arguments())
+
+    torch.cuda.synchronize()
+    elapsed_seconds = time.perf_counter() - start_time
+
+    num_gpus = torch.cuda.device_count()
+    total_gpu_hours = (elapsed_seconds / 3600) * num_gpus
+
+    print(f"Total GPU Hours across {num_gpus} GPU(s): {total_gpu_hours:.4f}")
