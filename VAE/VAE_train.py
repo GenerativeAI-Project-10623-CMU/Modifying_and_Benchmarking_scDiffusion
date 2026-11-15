@@ -85,9 +85,15 @@ def train_vae(args, return_model=False):
 
         minibatch_training_stats = autoencoder.train(genes)
 
-        if step % 1000 == 0:
+        # if step % 1000 == 0:
+        if len(minibatch_training_stats):
+            avg_loss = 0
             for key, val in minibatch_training_stats.items():
-                print('step ', step, 'loss ', val)
+                avg_loss += val
+            avg_loss /= len(minibatch_training_stats)
+            
+            print('step ', step, 'loss ', avg_loss)
+            wandb.log({"loss": avg_loss, "steps": step})
 
         ellapsed_minutes = (time.time() - start_time) / 60
 
@@ -108,7 +114,7 @@ def train_vae(args, return_model=False):
 
             if stop:
                 break
-
+        
     if return_model:
         return autoencoder, datasets
 
@@ -136,7 +142,9 @@ def parse_arguments():
 
     # training arguments
     parser.add_argument("--max_steps", type=int, default=200000)
+
     parser.add_argument("--max_minutes", type=int, default=3000)
+
     parser.add_argument("--checkpoint_freq", type=int, default=50000)
     parser.add_argument("--batch_size", type=int, default=128)
 
