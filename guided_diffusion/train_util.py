@@ -1,6 +1,8 @@
 import copy
 import functools
 import os
+import wandb
+import time
 
 import blobfile as bf
 import torch as th
@@ -40,6 +42,7 @@ class TrainLoop:
         lr_anneal_steps=0,
         model_name,
         save_dir,
+        max_minutes
     ):
         self.model = model
         self.diffusion = diffusion
@@ -110,6 +113,7 @@ class TrainLoop:
             self.ddp_model = self.model
         self.timestamp = model_name #time.strftime("%m-%d-%H:%M",time.gmtime())
         self.save_dir = save_dir
+        self.max_minutes = max_minutes
 
     def _load_and_sync_parameters(self):
         resume_checkpoint = find_resume_checkpoint() or self.resume_checkpoint
@@ -154,7 +158,9 @@ class TrainLoop:
             )
             self.opt.load_state_dict(state_dict)
 
-    def run_loop(self):
+    def run_loop(self):    
+        start_time = time.time()
+        
         while (
             not self.lr_anneal_steps
             or self.step + self.resume_step < self.lr_anneal_steps
@@ -162,13 +168,18 @@ class TrainLoop:
             batch, cond = next(self.data)
             self.run_step(batch, cond)
             if self.step % self.log_interval == 0:
-                logger.dumpkvs()
+                wandb.log(logger.dumpkvs())
             if self.step % self.save_interval == 0:
                 self.save()
                 # Run for a finite amount of time in integration tests.
                 if os.environ.get("DIFFUSION_TRAINING_TEST", "") and self.step > 0:
                     return
             self.step += 1
+
+            ellapsed_minutes = (time.time() - start_time) / 60
+            if ellapsed_minutes > self.max_minutes:
+                break
+
         # Save the last checkpoint if it wasn't already saved.
         if (self.step - 1) % self.save_interval != 0:
             self.save()

@@ -4,6 +4,9 @@ Train a diffusion model on images.
 
 import argparse
 import sys
+import torch
+import time
+import wandb
 
 from guided_diffusion import dist_util, logger
 # from guided_diffusion.cell_datasets import load_data
@@ -63,7 +66,8 @@ def main():
         weight_decay=args.weight_decay,
         lr_anneal_steps=args.lr_anneal_steps,
         model_name=args.model_name,
-        save_dir=args.save_dir
+        save_dir=args.save_dir,
+        max_minutes=args.max_minutes
     ).run_loop()
 
 
@@ -84,7 +88,8 @@ def create_argparser():
         fp16_scale_growth=1e-3,
         vae_path = 'output/Autoencoder_checkpoint/muris_AE/model_seed=0_step=0.pt',
         model_name="muris_diffusion",
-        save_dir='output/diffusion_checkpoint'
+        save_dir='output/diffusion_checkpoint',
+        max_minutes=60
     )
     defaults.update(model_and_diffusion_defaults())
     parser = argparse.ArgumentParser()
@@ -100,9 +105,22 @@ def setup_seed(seed):
     torch.backends.cudnn.deterministic = True
 
 if __name__ == "__main__":
+    torch.cuda.synchronize()
+    start_time = time.perf_counter()
+
     print("Python executable:", sys.executable)
     print("PyTorch:", torch.__version__)
     print("CUDA available:", torch.cuda.is_available())
     print("CUDA device count:", torch.cuda.device_count())
 
+    wandb.init(project="scDiffusion", name="baseline-diffusion-training")
+
     main()
+
+    torch.cuda.synchronize()
+    elapsed_seconds = time.perf_counter() - start_time
+
+    num_gpus = torch.cuda.device_count()
+    total_gpu_hours = (elapsed_seconds / 3600) * num_gpus
+
+    print(f"Total GPU Hours across {num_gpus} GPU(s): {total_gpu_hours:.4f}")
